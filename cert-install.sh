@@ -81,6 +81,8 @@ DNS.10 = proxmox
 DNS.11 = ddwrt
 DNS.12 = pihole
 DNS.13 = freshbooks
+DNS.14 = zoominfo
+DNS.15 = zoominfo.lan
 EOF
 
 echo Generate an rsa key

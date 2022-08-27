@@ -2,7 +2,10 @@ version: "3.7"
 services:
   nginx-reverse-proxy:
     build: .
+    hostname: nginx-reverse-proxy
+    image: nginx-reverse-proxy
     container_name: nginx-reverse-proxy
+    restart: always
     # extra_hosts:
       # - "pihole.proxy:127.0.0.1"
     ports:

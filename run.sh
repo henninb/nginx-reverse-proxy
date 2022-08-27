@@ -29,7 +29,7 @@ else
     docker-compose up -d
   else
     docker build -t nginx-reverse-proxy .
-    docker run --name=nginx-reverse-proxy -h nginx-reverse-proxy -h nginx-reverse-proxy --restart unless-stopped -p 8401:8401 -p 8403:8403 -p 8405:8405 -p 8406:8406 -p 8410:8410 -d nginx-reverse-proxy
+    docker run --name=nginx-reverse-proxy -h nginx-reverse-proxy -h nginx-reverse-proxy --restart always -p 8401:8401 -p 8403:8403 -p 8405:8405 -p 8406:8406 -p 8410:8410 -d nginx-reverse-proxy
   fi
 fi
 

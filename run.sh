@@ -1,5 +1,13 @@
 #!/bin/sh
 
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 <platform>"
+  echo "docker or podman"
+  exit 1
+fi
+
+platform=$1
+
 cat << EOF > "$HOME/tmp/nginx-full.conf"
 events {}
 
@@ -7,6 +15,13 @@ http {
 $(cat nginx.conf)
 }
 EOF
+
+if [ "$platform" = "podman" ]; then
+  test
+elif [ "$platform" = "docker" ]; then
+  test
+fi
+
 
 if command -v nginx; then
   sudo cp -v "$HOME/tmp/nginx-full.conf" /etc/nginx/nginx.conf

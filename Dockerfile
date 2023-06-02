@@ -1,9 +1,9 @@
-FROM nginx
+FROM nginx:1.23.4-alpine
 
-RUN apt-get update
-RUN apt-get -y install iproute2
+RUN rm /etc/nginx/nginx.conf
 
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+# COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY ./proxy.crt /etc/ssl/certs/
 COPY ./proxy.key /etc/ssl/private/
 

@@ -41,8 +41,8 @@ else
     echo docker logs nginx-reverse-proxy
 
     if command -v docker-compose; then
-      docker-compose build
-      docker-compose up -d
+      docker compose build
+      docker compose up -d
     else
       docker build -t nginx-reverse-proxy .
       docker run --name=nginx-reverse-proxy -h nginx-reverse-proxy -h nginx-reverse-proxy --restart always -p 443:443 -d nginx-reverse-proxy

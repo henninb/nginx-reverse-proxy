@@ -93,6 +93,8 @@ openssl x509 -req -sha256 -days 365 -in ${server_name}.csr -CA "$HOME/ssl/rootCA
 echo Verify the certificate
 openssl verify -CAfile "$HOME/ssl/rootCA.pem" -verbose "./${server_name}.crt"
 
+cp "$HOME/ssl/rootCA.pem" .
+
 rm -rf *.csr
 
 exit 0

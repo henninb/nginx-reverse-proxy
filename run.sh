@@ -16,7 +16,7 @@ $(cat nginx.conf)
 }
 EOF
 
-
+sudo chmod 0755 /etc/cni
 
 if command -v nginx; then
   sudo cp -v "$HOME/tmp/nginx-full.conf" /etc/nginx/nginx.conf

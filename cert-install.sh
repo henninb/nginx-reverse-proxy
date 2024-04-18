@@ -73,10 +73,10 @@ DNS.2 = pfsense.lan
 DNS.3 = finance.lan
 DNS.4 = proxmox.lan
 DNS.5 = ddwrt.lan
-DNS.6 = pfsense
-DNS.7 = finance
-DNS.8 = proxmox
-DNS.9 = ddwrt
+DNS.6 = pfsense.proxy
+DNS.7 = finance.proxy
+DNS.8 = proxmox.proxy
+DNS.9 = ddwrt.proxy
 EOF
 
 echo Generate an rsa key

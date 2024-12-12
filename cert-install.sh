@@ -54,15 +54,15 @@ fi
 echo "generate testRootCA key (no password)"
 echo "generae a public testRootCA certificate file"
 openssl req \
-    -x509 \
-    -new \
-    -newkey rsa:4096 \
-    -nodes \
-    -days 1024 \
-    -sha256  \
-    -subj "$rootca_subject" \
-    -keyout "$HOME/ssl/testRootCA.key" \
-    -out "$HOME/ssl/testRootCA.pem"
+  -x509 \
+  -new \
+  -newkey rsa:4096 \
+  -nodes \
+  -days 1024 \
+  -sha256  \
+  -subj "$rootca_subject" \
+  -keyout "$HOME/ssl/testRootCA.key" \
+  -out "$HOME/ssl/testRootCA.pem"
 
 cat << EOF > "$HOME/tmp/$servername.ext"
 subjectAltName = @alt_names
@@ -77,6 +77,13 @@ DNS.6 = pfsense.proxy
 DNS.7 = finance.proxy
 DNS.8 = proxmox.proxy
 DNS.9 = ddwrt.proxy
+DNS.10 = switch0.lan
+DNS.11 = switch1.lan
+DNS.12 = plex.lan
+DNS.13 = gitlab.lan
+DNS.14 = switch0.proxy
+DNS.15 = switch1.proxy
+DNS.16 = plex.proxy
 EOF
 
 echo Generate an rsa key

@@ -84,6 +84,8 @@ DNS.13 = gitlab.lan
 DNS.14 = switch0.proxy
 DNS.15 = switch1.proxy
 DNS.16 = plex.proxy
+DNS.17 = finance.bhenning.com
+DNS.18 = finance.brianhenning.com
 EOF
 
 echo Generate an rsa key

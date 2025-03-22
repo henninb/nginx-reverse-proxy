@@ -4,9 +4,9 @@ echo set -gx DOCKER_HOST tcp://192.168.10.10:2375
 echo export DOCKER_HOST=tcp://192.168.10.10:2375
 echo export DOCKER_HOST=ssh://henninb@192.168.10.10
 
-doas cp /etc/letsencrypt/live/finance.bhenning.com/privkey.pem finance.bhenning.privkey.pem
-doas cp /etc/letsencrypt/live/finance.bhenning.com/fullchain.pem finance.bhenning.fullchain.pem
-doas chown henninb:henninb *.pem
+# doas cp /etc/letsencrypt/live/finance.bhenning.com/privkey.pem finance.bhenning.privkey.pem
+# doas cp /etc/letsencrypt/live/finance.bhenning.com/fullchain.pem finance.bhenning.fullchain.pem
+# doas chown henninb:henninb *.pem
 
 docker context create remote --docker "host=ssh://henninb@192.168.10.10"
 # echo docker context use remote

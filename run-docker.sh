@@ -91,9 +91,60 @@ echo export DOCKER_HOST=ssh://henninb@192.168.10.10
 # doas cp /etc/letsencrypt/live/finance.bhenning.com/fullchain.pem finance.bhenning.fullchain.pem
 # doas chown henninb:henninb *.pem
 
+# Check nginx Docker image version on remote server
+check_nginx_docker_version() {
+  log "=== Nginx Docker Image Version Check (Remote Server) ==="
+
+  # Get current nginx image ID if it exists
+  local current_image_id
+  current_image_id=$(DOCKER_HOST=ssh://henninb@192.168.10.10 docker images nginx:latest --format "{{.ID}}" 2>/dev/null | head -1)
+
+  if [ -n "$current_image_id" ]; then
+    # Get current nginx version
+    local current_version
+    current_version=$(DOCKER_HOST=ssh://henninb@192.168.10.10 docker run --rm nginx:latest nginx -v 2>&1 | grep -o 'nginx/[0-9.]*' | cut -d'/' -f2)
+    log "Current remote nginx version: $current_version (Image: $current_image_id)"
+  else
+    log "No nginx:latest image found on remote server"
+  fi
+
+  # Pull latest nginx image
+  log "Pulling latest nginx image on remote server..."
+  if ! DOCKER_HOST=ssh://henninb@192.168.10.10 docker pull nginx:latest; then
+    log_error "Failed to pull nginx:latest on remote server"
+    return 1
+  fi
+
+  # Get new image info
+  local new_image_id
+  new_image_id=$(DOCKER_HOST=ssh://henninb@192.168.10.10 docker images nginx:latest --format "{{.ID}}" 2>/dev/null | head -1)
+
+  local new_version
+  new_version=$(DOCKER_HOST=ssh://henninb@192.168.10.10 docker run --rm nginx:latest nginx -v 2>&1 | grep -o 'nginx/[0-9.]*' | cut -d'/' -f2)
+
+  log "Latest nginx version: $new_version (Image: $new_image_id)"
+
+  # Compare versions
+  if [ -n "$current_image_id" ] && [ "$current_image_id" = "$new_image_id" ]; then
+    log "✓ Already using latest nginx version: $new_version"
+  elif [ -n "$current_image_id" ]; then
+    log "✓ Updated nginx from $current_version to $new_version"
+  else
+    log "✓ Downloaded nginx version: $new_version"
+  fi
+
+  return 0
+}
+
 # Validate certificates before deployment
 if ! validate_certificates; then
   log_error "Cannot proceed with deployment due to certificate validation failures."
+  exit 1
+fi
+
+# Check nginx Docker image version
+if ! check_nginx_docker_version; then
+  log_error "Failed to check nginx Docker image version."
   exit 1
 fi
 

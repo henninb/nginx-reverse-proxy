@@ -1,0 +1,292 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-reverse-proxy
+  namespace: default
+  labels:
+    app: nginx-reverse-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-reverse-proxy
+  template:
+    metadata:
+      labels:
+        app: nginx-reverse-proxy
+    spec:
+      tolerations:
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 0
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: nginx-reverse-proxy
+        image: nginx:alpine
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 443
+          name: https
+          protocol: TCP
+        - containerPort: 2223
+          name: gitlab-ssh
+          protocol: TCP
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+        - name: ssl-certs
+          mountPath: /etc/ssl/certs
+          readOnly: true
+        - name: ssl-private
+          mountPath: /etc/ssl/private
+          readOnly: true
+        command: ["nginx"]
+        args: ["-g", "daemon off;"]
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities:
+            add:
+            - NET_BIND_SERVICE
+            - CHOWN
+            - SETUID
+            - SETGID
+            drop:
+            - ALL
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 443
+            scheme: HTTPS
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 443
+            scheme: HTTPS
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-config
+      - name: ssl-certs
+        secret:
+          secretName: ssl-certificates
+      - name: ssl-private
+        secret:
+          secretName: ssl-private-keys
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: default
+data:
+  nginx.conf: |
+    worker_processes auto;
+
+    error_log /var/log/nginx/error.log warn;
+    pid /var/run/nginx.pid;
+
+    events {
+      worker_connections  1024;
+    }
+
+    stream {
+      upstream gitlab_ssh {
+        server 192.168.10.10:2222;
+      }
+
+      server {
+        listen 2223;
+        proxy_pass gitlab_ssh;
+        proxy_timeout 1s;
+        proxy_responses 1;
+      }
+    }
+
+    http {
+      server_tokens off;
+      ssl_protocols TLSv1.2 TLSv1.3;
+      ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384;
+      ssl_prefer_server_ciphers on;
+      ssl_session_cache shared:SSL:10m;
+      ssl_session_timeout 10m;
+
+      include /etc/nginx/mime.types;
+      default_type  application/octet-stream;
+      sendfile on;
+      keepalive_timeout 65;
+
+      # Security headers
+      add_header X-Frame-Options DENY always;
+      add_header X-Content-Type-Options nosniff always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+      error_log /dev/stderr warn;
+      log_format main '$remote_addr - $remote_user [$time_local] '
+                    '"$request" $status $body_bytes_sent '
+                    '"$http_referer" "$http_user_agent"';
+      access_log /dev/stdout  main;
+
+      upstream ddwrt {
+        server 192.168.20.2:443;
+      }
+
+      upstream pfsense {
+        server 192.168.10.1:8006;
+      }
+
+      upstream gitlab {
+        server 192.168.10.10:80;
+      }
+
+      upstream finance {
+        server 192.168.10.10:8443;
+      }
+
+      upstream proxmox {
+        server 192.168.10.5:8006;
+      }
+
+      upstream switch0 {
+        server 192.168.10.30:80;
+      }
+
+      upstream switch1 {
+        server 192.168.10.31:80;
+      }
+
+      upstream jellyfin {
+        server 10.0.0.175:8096;
+      }
+
+      proxy_headers_hash_bucket_size 128;
+
+      server {
+        listen 443 ssl;
+        http2 on;
+        server_name pfsense.bhenning.com;
+
+        ssl_certificate /etc/ssl/certs/bhenning.fullchain.pem;
+        ssl_certificate_key /etc/ssl/private/bhenning.privkey.pem;
+
+        location / {
+          proxy_pass https://pfsense;
+          proxy_ssl_server_name on;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_ssl_verify off;
+        }
+      }
+
+      server {
+        listen 443 ssl;
+        http2 on;
+        server_name pfsense.brianhenning.com;
+
+        ssl_certificate /etc/ssl/certs/brianhenning.fullchain.pem;
+        ssl_certificate_key /etc/ssl/private/brianhenning.privkey.pem;
+
+        location / {
+          proxy_pass https://pfsense;
+          proxy_ssl_server_name on;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_ssl_verify off;
+        }
+      }
+
+      server {
+        listen 443 ssl;
+        http2 on;
+        server_name vercel.bhenning.com;
+
+        ssl_certificate /etc/ssl/certs/bhenning.fullchain.pem;
+        ssl_certificate_key /etc/ssl/private/bhenning.privkey.pem;
+
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers HIGH:!aNULL:!MD5;
+        ssl_prefer_server_ciphers on;
+
+        # Local Next.js APIs - pass through to Vercel (must come before general /api/ block)
+        location ~ ^/api/(nhl|nba|nfl|mlb|celsius|fahrenheit|lead|player-ads|player-analytics|player-heartbeat|player-metadata|weather|uuid|human)(/.*)?$ {
+            proxy_pass https://nextjs-website-alpha-weld.vercel.app$request_uri;
+            proxy_set_header Host nextjs-website-alpha-weld.vercel.app;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_ssl_server_name on;
+            proxy_ssl_name nextjs-website-alpha-weld.vercel.app;
+        }
+
+      # Special handling for GraphQL - map /api/graphql to /graphql
+      location /api/graphql {
+          proxy_pass https://finance/graphql;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_pass_header Access-Control-Allow-Origin;
+          proxy_pass_header Access-Control-Allow-Methods;
+          proxy_pass_header Access-Control-Allow-Headers;
+      }
+
+        # Route remaining API calls to local finance service
+        location /api/ {
+            proxy_pass https://finance/api/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_pass_header Access-Control-Allow-Origin;
+            proxy_pass_header Access-Control-Allow-Methods;
+            proxy_pass_header Access-Control-Allow-Headers;
+        }
+
+        location / {
+            proxy_pass https://nextjs-website-alpha-weld.vercel.app;
+            proxy_set_header Host nextjs-website-alpha-weld.vercel.app;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+
+            proxy_ssl_server_name on;
+            proxy_ssl_name nextjs-website-alpha-weld.vercel.app;
+        }
+    }
+
+      # Continue with other server blocks...
+      # (Additional server blocks can be added as needed)
+
+      server {
+        listen 443 ssl;
+        server_name _;
+
+        ssl_certificate /etc/ssl/certs/bhenning.fullchain.pem;
+        ssl_certificate_key /etc/ssl/private/bhenning.privkey.pem;
+
+        location / {
+            return 404;
+        }
+      }
+    }

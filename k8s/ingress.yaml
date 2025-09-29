@@ -1,0 +1,224 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-reverse-proxy-ingress
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"  # Optional: if using cert-manager
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - "*.bhenning.com"
+    - "*.brianhenning.com"
+    secretName: bhenning-tls
+  - hosts:
+    - "*.brianhenning.com"
+    secretName: brianhenning-tls
+  rules:
+  - host: pfsense.bhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: pfsense.brianhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: vercel.bhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: www.bhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: netlify.bhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: vercel.brianhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: finance.bhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: finance.brianhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: gitlab.bhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: gitlab.brianhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: ddwrt.bhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: ddwrt.brianhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: jellyfin.bhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: jellyfin.brianhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: proxmox.bhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: proxmox.brianhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: switch0.bhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: switch0.brianhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: switch1.bhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443
+  - host: switch1.brianhenning.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-reverse-proxy-service
+            port:
+              number: 443

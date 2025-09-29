@@ -1,0 +1,38 @@
+# Talos machine configuration patch to expose port 443
+# Apply this to your Talos cluster to forward port 443 to the nginx NodePort
+
+machine:
+  network:
+    extraHostEntries:
+      - ip: 127.0.0.1
+        aliases:
+          - nginx-reverse-proxy
+  sysctls:
+    net.ipv4.ip_forward: "1"
+
+# Alternative approach: Use Talos built-in network forwarding
+# This requires applying the patch to your machine config
+
+---
+# Example patch file for talosctl
+# Usage: talosctl patch machineconfig --patch @talos-expose-443.yaml
+
+op: add
+path: /machine/network/extraHostEntries
+value:
+  - ip: 127.0.0.1
+    aliases:
+      - nginx-local
+
+---
+# For more advanced setups, use the firewall configuration
+op: add
+path: /machine/network
+value:
+  interfaces:
+    - interface: eth0  # Replace with your interface name
+      routes:
+        - network: 0.0.0.0/0
+          gateway: 192.168.10.1  # Replace with your gateway
+      addresses:
+        - 192.168.10.176/24  # Replace with your node IP

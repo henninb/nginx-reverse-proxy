@@ -8,7 +8,6 @@ Nginx reverse proxy deployed to Kubernetes with `hostNetwork: true` for direct p
 ### Deploy to Kubernetes
 ```bash
 kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/service.yaml
 ```
 
 ### Verify
@@ -37,13 +36,11 @@ curl -k https://192.168.10.12:443
 
 - `nginx.conf` - Main nginx configuration
 - `k8s/deployment.yaml` - Kubernetes deployment with ConfigMap
-- `k8s/service.yaml` - NodePort and LoadBalancer services
 
 ## Access
 
-- **Direct (hostNetwork)**: `https://192.168.10.12:443`
-- **NodePort**: `https://192.168.10.12:30443` (if needed)
-- **GitLab SSH**: Port 2223 or 30223
+- **HTTPS**: `https://192.168.10.12:443`
+- **GitLab SSH**: `192.168.10.12:2223`
 
 ## Important Notes
 

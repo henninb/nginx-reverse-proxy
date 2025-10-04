@@ -70,16 +70,6 @@ spec:
           limits:
             memory: "256Mi"
             cpu: "200m"
-        livenessProbe:
-          tcpSocket:
-            port: 443
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          tcpSocket:
-            port: 443
-          initialDelaySeconds: 5
-          periodSeconds: 5
       volumes:
       - name: nginx-config
         configMap:

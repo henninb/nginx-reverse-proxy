@@ -77,9 +77,6 @@ kubectl apply -f k8s/ssl-private-keys-secret.yaml
 echo "Creating Deployment..."
 kubectl apply -f k8s/deployment.yaml
 
-echo "Creating Service..."
-kubectl apply -f k8s/service.yaml
-
 echo "Waiting for deployment to be ready..."
 kubectl wait --for=condition=available --timeout=300s deployment/nginx-reverse-proxy || true
 
@@ -92,8 +89,8 @@ echo "Deployment status:"
 kubectl get deployments nginx-reverse-proxy
 
 echo ""
-echo "Service status:"
-kubectl get services nginx-reverse-proxy-service
+echo "Note: This deployment uses hostNetwork, accessible at:"
+echo "  https://192.168.10.12:443 (worker node IP)"
 
 echo ""
 echo "Pods:"
@@ -103,6 +100,7 @@ echo ""
 echo "To check logs:"
 echo "  kubectl logs -l app=nginx-reverse-proxy -f"
 echo ""
-echo "To access the service:"
-echo "  kubectl port-forward service/nginx-reverse-proxy-service 8443:443"
-echo "  curl -k https://localhost:8443"
+echo "To access the service (using hostNetwork):"
+echo "  curl -k https://192.168.10.12"
+echo ""
+echo "The nginx reverse proxy is accessible on the worker node's IP at port 443."

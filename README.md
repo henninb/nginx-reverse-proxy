@@ -1,0 +1,54 @@
+# Nginx Reverse Proxy for Kubernetes
+
+## Overview
+Nginx reverse proxy deployed to Kubernetes with `hostNetwork: true` for direct port 443/2223 access.
+
+## Quick Start
+
+### Deploy to Kubernetes
+```bash
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+```
+
+### Verify
+```bash
+kubectl get pods -l app=nginx-reverse-proxy
+curl -k https://192.168.10.12:443
+```
+
+## Configuration
+
+### Network Mode
+- **hostNetwork: true** - Binds directly to host ports
+- **Ports**: 443 (HTTPS), 2223 (GitLab SSH)
+- **Pinned to**: debian-k8s-worker-01
+
+### DNS Resolution
+- **Resolver**: `8.8.8.8 8.8.4.4` for external hostname resolution
+- **Variables**: Uses `set $vercel_backend` for dynamic proxy_pass
+
+### Health Checks
+- **Type**: tcpSocket on port 443
+- **Liveness**: 30s initial delay, 10s period
+- **Readiness**: 5s initial delay, 5s period
+
+## Files
+
+- `nginx.conf` - Main nginx configuration
+- `k8s/deployment.yaml` - Kubernetes deployment with ConfigMap
+- `k8s/service.yaml` - NodePort and LoadBalancer services
+
+## Access
+
+- **Direct (hostNetwork)**: `https://192.168.10.12:443`
+- **NodePort**: `https://192.168.10.12:30443` (if needed)
+- **GitLab SSH**: Port 2223 or 30223
+
+## Important Notes
+
+⚠️ **Do NOT add iptables NAT redirects** (443→30443) when using hostNetwork - it breaks direct port binding.
+
+## Related
+
+See `~/ansible/debian-k8/playbooks/README-nginx-reverse-proxy.md` for Ansible deployment details.

@@ -15,6 +15,10 @@ spec:
       labels:
         app: nginx-reverse-proxy
     spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      nodeSelector:
+        kubernetes.io/hostname: debian-k8s-worker-01
       tolerations:
       - key: "node-role.kubernetes.io/control-plane"
         operator: "Exists"
@@ -67,17 +71,13 @@ spec:
             memory: "256Mi"
             cpu: "200m"
         livenessProbe:
-          httpGet:
-            path: /
+          tcpSocket:
             port: 443
-            scheme: HTTPS
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
-          httpGet:
-            path: /
+          tcpSocket:
             port: 443
-            scheme: HTTPS
           initialDelaySeconds: 5
           periodSeconds: 5
       volumes:
@@ -121,6 +121,10 @@ data:
     }
 
     http {
+      # DNS resolver for dynamic hostname resolution
+      resolver 8.8.8.8 8.8.4.4 valid=300s;
+      resolver_timeout 5s;
+
       server_tokens off;
       ssl_protocols TLSv1.2 TLSv1.3;
       ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384;
@@ -230,13 +234,14 @@ data:
 
         # Local Next.js APIs - pass through to Vercel (must come before general /api/ block)
         location ~ ^/api/(nhl|nba|nfl|mlb|celsius|fahrenheit|lead|player-ads|player-analytics|player-heartbeat|player-metadata|weather|uuid|human)(/.*)?$ {
-            proxy_pass https://nextjs-website-alpha-weld.vercel.app$request_uri;
-            proxy_set_header Host nextjs-website-alpha-weld.vercel.app;
+            set $vercel_backend "nextjs-website-alpha-weld.vercel.app";
+            proxy_pass https://$vercel_backend$request_uri;
+            proxy_set_header Host $vercel_backend;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
             proxy_ssl_server_name on;
-            proxy_ssl_name nextjs-website-alpha-weld.vercel.app;
+            proxy_ssl_name $vercel_backend;
         }
 
       # Special handling for GraphQL - map /api/graphql to /graphql
@@ -264,14 +269,15 @@ data:
         }
 
         location / {
-            proxy_pass https://nextjs-website-alpha-weld.vercel.app;
-            proxy_set_header Host nextjs-website-alpha-weld.vercel.app;
+            set $vercel_backend "nextjs-website-alpha-weld.vercel.app";
+            proxy_pass https://$vercel_backend;
+            proxy_set_header Host $vercel_backend;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
 
             proxy_ssl_server_name on;
-            proxy_ssl_name nextjs-website-alpha-weld.vercel.app;
+            proxy_ssl_name $vercel_backend;
         }
     }
 

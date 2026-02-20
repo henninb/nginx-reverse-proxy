@@ -38,9 +38,6 @@ spec:
         - containerPort: 443
           name: https
           protocol: TCP
-        - containerPort: 2223
-          name: gitlab-ssh
-          protocol: TCP
         volumeMounts:
         - name: nginx-config
           mountPath: /etc/nginx/nginx.conf
@@ -95,19 +92,6 @@ data:
 
     events {
       worker_connections  1024;
-    }
-
-    stream {
-      upstream gitlab_ssh {
-        server 192.168.10.10:2222;
-      }
-
-      server {
-        listen 2223;
-        proxy_pass gitlab_ssh;
-        proxy_timeout 1s;
-        proxy_responses 1;
-      }
     }
 
     http {

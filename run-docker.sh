@@ -156,7 +156,7 @@ docker context create remote --docker "host=ssh://henninb@192.168.10.10" 2>/dev/
 
 docker build -t nginx-reverse-proxy .
 docker rm -f nginx-reverse-proxy 2>/dev/null || true
-docker run --name=nginx-reverse-proxy -h nginx-reverse-proxy --restart unless-stopped --dns 192.168.10.1 --dns 8.8.8.8 -p 443:443 -p 2223:2223 -d nginx-reverse-proxy
+docker run --name=nginx-reverse-proxy -h nginx-reverse-proxy --restart unless-stopped --dns 192.168.10.1 --dns 8.8.8.8 -p 443:443 -d nginx-reverse-proxy
 docker ps -a
 
 exit 0

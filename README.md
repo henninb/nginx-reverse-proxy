@@ -1,7 +1,7 @@
 # Nginx Reverse Proxy for Kubernetes
 
 ## Overview
-Nginx reverse proxy deployed to Kubernetes with `hostNetwork: true` for direct port 443/2223 access.
+Nginx reverse proxy deployed to Kubernetes with `hostNetwork: true` for direct port 443 access.
 
 ## Quick Start
 
@@ -20,7 +20,7 @@ curl -k https://192.168.10.12:443
 
 ### Network Mode
 - **hostNetwork: true** - Binds directly to host ports
-- **Ports**: 443 (HTTPS), 2223 (GitLab SSH)
+- **Ports**: 443 (HTTPS)
 - **Pinned to**: debian-k8s-worker-01
 
 ### DNS Resolution
@@ -40,7 +40,6 @@ curl -k https://192.168.10.12:443
 ## Access
 
 - **HTTPS**: `https://192.168.10.12:443`
-- **GitLab SSH**: `192.168.10.12:2223`
 
 ## Important Notes
 

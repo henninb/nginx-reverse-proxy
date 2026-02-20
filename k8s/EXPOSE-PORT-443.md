@@ -41,7 +41,6 @@ machine:
     - content: |
         #!/bin/bash
         iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 30443
-        iptables -t nat -A PREROUTING -p tcp --dport 2223 -j REDIRECT --to-port 30223
       permissions: 0755
       path: /etc/kubernetes/setup-port-forward.sh
   time:
@@ -90,7 +89,6 @@ Then your LoadBalancer service will get an external IP automatically.
 ```bash
 # SSH to your Talos node and run:
 sudo iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 30443
-sudo iptables -t nat -A PREROUTING -p tcp --dport 2223 -j REDIRECT --to-port 30223
 
 # Test
 curl -k https://192.168.10.176:443/

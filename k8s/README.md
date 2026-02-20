@@ -73,7 +73,7 @@ kubectl apply -k k8s/
 ### Deployment
 - **Replicas**: 2 (for high availability)
 - **Image**: `nginx-reverse-proxy:latest`
-- **Ports**: 443 (HTTPS), 2223 (GitLab SSH)
+- **Ports**: 443 (HTTPS)
 - **Resources**: 128Mi-256Mi memory, 100m-200m CPU
 - **Health Checks**: Liveness and readiness probes on HTTPS endpoint
 

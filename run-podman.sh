@@ -178,9 +178,7 @@ podman run \
   --name="${CONTAINER_NAME}" \
   --hostname="${CONTAINER_NAME}" \
   --restart=unless-stopped \
-  --dns 192.168.10.1 \
-  --dns 8.8.8.8 \
-  -p 443:443 \
+  --network=host \
   -d \
   "${IMAGE_NAME}"
 

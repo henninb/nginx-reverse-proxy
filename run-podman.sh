@@ -184,6 +184,15 @@ podman run \
 
 podman ps -a
 
+echo "Setting up systemd user service for auto-start on boot..."
+mkdir -p ~/.config/systemd/user
+podman generate systemd --name "${CONTAINER_NAME}" --files --new \
+  > ~/.config/systemd/user/container-${CONTAINER_NAME}.service
+systemctl --user daemon-reload
+systemctl --user enable "container-${CONTAINER_NAME}.service"
+loginctl enable-linger
+echo "Auto-start configured via systemd user service."
+
 echo "Cleaning up build directory..."
 rm -rf "${REMOTE_DIR}"
 ENDSSH

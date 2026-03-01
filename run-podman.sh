@@ -177,21 +177,41 @@ echo "Starting container..."
 podman run \
   --name="${CONTAINER_NAME}" \
   --hostname="${CONTAINER_NAME}" \
-  --restart=unless-stopped \
   --network=host \
   -d \
   "${IMAGE_NAME}"
 
 podman ps -a
 
-echo "Setting up systemd user service for auto-start on boot..."
-mkdir -p ~/.config/systemd/user
-podman generate systemd --name "${CONTAINER_NAME}" --files --new \
-  > ~/.config/systemd/user/container-${CONTAINER_NAME}.service
-systemctl --user daemon-reload
-systemctl --user enable "container-${CONTAINER_NAME}.service"
-loginctl enable-linger
-echo "Auto-start configured via systemd user service."
+echo "Writing systemd Quadlet for auto-start on boot..."
+mkdir -p ~/.config/containers/systemd
+cat > ~/.config/containers/systemd/${CONTAINER_NAME}.container << EOF
+[Unit]
+Description=Nginx Reverse Proxy
+After=network-online.target
+
+[Container]
+Image=localhost/${IMAGE_NAME}
+ContainerName=${CONTAINER_NAME}
+HostName=${CONTAINER_NAME}
+Network=host
+PullPolicy=never
+
+[Service]
+Restart=always
+TimeoutStartSec=60
+
+[Install]
+WantedBy=default.target
+EOF
+
+# Reload user systemd instance if accessible (not available in non-login SSH sessions)
+export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
+export DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user/$(id -u)/bus}
+systemctl --user daemon-reload 2>/dev/null || true
+
+echo "Quadlet written to ~/.config/containers/systemd/${CONTAINER_NAME}.container"
+echo "NOTE: Run 'sudo loginctl enable-linger ${USER}' on this host to enable auto-start on reboot."
 
 echo "Cleaning up build directory..."
 rm -rf "${REMOTE_DIR}"

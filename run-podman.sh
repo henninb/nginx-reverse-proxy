@@ -185,6 +185,9 @@ podman run \
   "${IMAGE_NAME}"
 
 podman ps -a
+
+echo "Cleaning up build directory..."
+rm -rf "${REMOTE_DIR}"
 ENDSSH
 
 exit 0

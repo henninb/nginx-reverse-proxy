@@ -195,7 +195,6 @@ Image=localhost/${IMAGE_NAME}
 ContainerName=${CONTAINER_NAME}
 HostName=${CONTAINER_NAME}
 Network=host
-PullPolicy=never
 
 [Service]
 Restart=always

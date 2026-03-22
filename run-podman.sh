@@ -197,7 +197,7 @@ HostName=${CONTAINER_NAME}
 Network=host
 
 [Service]
-Restart=always
+Restart=no
 TimeoutStartSec=60
 
 [Install]

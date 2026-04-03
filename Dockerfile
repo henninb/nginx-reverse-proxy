@@ -16,7 +16,6 @@ COPY --chmod=640 --chown=root:nginx ./brianhenning.privkey.pem /etc/ssl/private/
 
 # RUN mkdir -p /usr/local/share/ca-certificates
 # COPY ./rootCA.pem /usr/local/share/ca-certificates/rootCA.pem
-RUN apk update
 RUN apk add -q --no-cache ca-certificates libcap
 
 # Allow nginx binary to bind to privileged ports as nonroot

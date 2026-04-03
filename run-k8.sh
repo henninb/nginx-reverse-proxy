@@ -50,9 +50,9 @@ command -v docker &>/dev/null || command -v podman &>/dev/null \
 
 info "Building Docker image: $IMAGE (tag: $IMAGE_TAG)"
 if command -v docker &>/dev/null; then
-    docker build -t "$IMAGE" .
+    docker build --network=host -t "$IMAGE" .
 else
-    podman build -t "$IMAGE" .
+    podman build --network=host -t "$IMAGE" .
 fi
 
 # Load image into the cluster nodes via containerd (no registry needed).

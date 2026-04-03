@@ -154,6 +154,10 @@ data:
         server 10.0.0.175:8096;
       }
 
+      upstream calendar {
+        server calendar-app.default.svc.cluster.local:8000;
+      }
+
       proxy_headers_hash_bucket_size 128;
 
       server {
@@ -254,6 +258,40 @@ data:
             proxy_ssl_name $vercel_backend;
         }
     }
+
+      server {
+        listen 443 ssl;
+        http2 on;
+        server_name calendar.bhenning.com;
+
+        ssl_certificate /etc/ssl/certs/bhenning.fullchain.pem;
+        ssl_certificate_key /etc/ssl/private/bhenning.privkey.pem;
+
+        location / {
+          proxy_pass http://calendar;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+        }
+      }
+
+      server {
+        listen 443 ssl;
+        http2 on;
+        server_name calendar.brianhenning.com;
+
+        ssl_certificate /etc/ssl/certs/brianhenning.fullchain.pem;
+        ssl_certificate_key /etc/ssl/private/brianhenning.privkey.pem;
+
+        location / {
+          proxy_pass http://calendar;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+        }
+      }
 
       # Continue with other server blocks...
       # (Additional server blocks can be added as needed)

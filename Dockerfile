@@ -1,5 +1,6 @@
 # FROM nginx:1.27.3-alpine
-FROM nginx:1.28.3-alpine
+# FROM nginx:1.28.3-alpine
+FROM nginx:1.31.1-alpine
 
 RUN rm /etc/nginx/nginx.conf
 

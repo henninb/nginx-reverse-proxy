@@ -158,6 +158,10 @@ data:
         server calendar-app.default.svc.cluster.local:8000;
       }
 
+      upstream immich {
+        server 192.168.10.10:2283;
+      }
+
       proxy_headers_hash_bucket_size 128;
 
       server {
@@ -293,8 +297,53 @@ data:
         }
       }
 
-      # Continue with other server blocks...
-      # (Additional server blocks can be added as needed)
+      server {
+        listen 443 ssl;
+        http2 on;
+        server_name immich.bhenning.com;
+
+        ssl_certificate /etc/ssl/certs/bhenning.fullchain.pem;
+        ssl_certificate_key /etc/ssl/private/bhenning.privkey.pem;
+
+        client_max_body_size 50000M;
+        proxy_read_timeout 600s;
+        proxy_send_timeout 600s;
+
+        location / {
+          proxy_pass http://immich;
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+        }
+      }
+
+      server {
+        listen 443 ssl;
+        http2 on;
+        server_name immich.brianhenning.com;
+
+        ssl_certificate /etc/ssl/certs/brianhenning.fullchain.pem;
+        ssl_certificate_key /etc/ssl/private/brianhenning.privkey.pem;
+
+        client_max_body_size 50000M;
+        proxy_read_timeout 600s;
+        proxy_send_timeout 600s;
+
+        location / {
+          proxy_pass http://immich;
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+        }
+      }
 
       server {
         listen 443 ssl;
